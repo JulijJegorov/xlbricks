@@ -1,0 +1,6 @@
+{"INTERPRETER":"...\\pythonw.exe",
+"PYTHONPATH": "...\\xlbricks;...\\models",
+"CONTEXT": {
+    "ClassName": "path.to.module",
+	}
+}
