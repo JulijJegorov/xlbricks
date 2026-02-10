@@ -49,17 +49,18 @@ class ExplorerTreeView(QTreeView):
 class ExplorerTableView(QTableView):
     def __init__(self):
         super(QTableView, self).__init__()
-        self.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.setStyleSheet("selection-background-color: rgb(210, 232, 255); font-size: 16px; text-align: right;")
+        # self.setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.setStyleSheet("selection-background-color: rgb(210, 232, 255); font-size: 16px; text-align: right;")
 
     def refresh(self, data=None):
         if data is None:
             df = pd.DataFrame()
-        elif isinstance(data, (pd.DataFrame, np.ndarray)):
+        elif isinstance(data, pd.DataFrame):
+            df = data
+        elif isinstance(data, np.ndarray):
             df = pd.DataFrame(data)
         else:
             df = pd.DataFrame(np.array([data]))
-        df = pd.DataFrame()
         self.setModel(PandasModel(df))
 
 
@@ -78,11 +79,26 @@ class Explorer(QWidget):
         self._table_view.refresh()
 
     def load_data_frame(self):
-        item = self._tree_view.selectedIndexes()[0]
-        index = self._tree_view.currentIndex()
-        data_frame = item.model().get_node(index).value
-        self._table_view.refresh(data_frame)
-        self._table_view.resizeRowsToContents()
+        try:
+            index = self._tree_view.currentIndex()
+            if not index.isValid():
+                return
+            node = index.model().get_node(index)
+            if not hasattr(node, 'value') or node.value is None:
+                self._table_view.refresh(None)
+                return
+            data_frame = node.value
+            # Make a defensive copy to isolate from Excel COM thread
+            if isinstance(data_frame, pd.DataFrame):
+                data_frame = data_frame.copy(deep=True)
+            elif isinstance(data_frame, np.ndarray):
+                data_frame = np.copy(data_frame)
+            self._table_view.refresh(data_frame)
+        except Exception as e:
+            print(f"Error loading data frame: {e}")
+            import traceback
+            traceback.print_exc()
+            self._table_view.refresh(None)
 
     def display(self):
         self.setWindowTitle('wizard')

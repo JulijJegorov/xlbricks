@@ -18,7 +18,7 @@ class PandasModel(QtCore.QAbstractTableModel):
                     return QtCore.QVariant()
             elif orientation == QtCore.Qt.Vertical:
                 try:
-                    return self._df.index.tolist()[section]
+                    return str(self._df.index.tolist()[section])
                 except (IndexError, ):
                     return QtCore.QVariant()
         elif role == QtCore.Qt.TextAlignmentRole:
@@ -29,11 +29,10 @@ class PandasModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
-            self._df.index = self._df.index.map(str)
             cell_value = self._df.iloc[index.row(), index.column()]
-            if isinstance(cell_value, np.float):
+            # Check for numeric types (numpy and python floats)
+            if isinstance(cell_value, (float, np.floating)):
                 cell_value = np.around(cell_value, 5)
-                return QtCore.QVariant(str(cell_value))
             return QtCore.QVariant(str(cell_value))
 
         elif role == QtCore.Qt.TextAlignmentRole:

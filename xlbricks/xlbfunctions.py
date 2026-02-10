@@ -16,10 +16,12 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 from xlbricks.ui.explorer import Explorer
 from xlbricks.ui.tree_model import DictionaryTreeModel, node_structure_from_dict
+from xlbricks.ui.config_editor import show_config_editor
 from xlbricks.libs.xlbricks_frontstack import XLBricksFrontStack
 
 
 @xw.func
+@xw.arg('key')
 @xw.arg('data', np.array, ndim=2)
 @xw.arg('xlapp', vba='Application')
 def xlb_brick(key, data, persist=True, xlapp=None):
@@ -180,6 +182,17 @@ def xlb_open_brick_explorer(data):
         wizard = Explorer(model)
         wizard.display_one_element()
         sys.exit(explorer_app.exec_())
+
+
+@xw.func
+def xlb_open_config_editor():
+    """Open the XLBricks config editor UI (same as XLBricks Wizard, from Excel)."""
+    config_app = QApplication(sys.argv)
+    img_path = _get_wizard_image_path()
+    if osp.isfile(img_path):
+        config_app.setWindowIcon(QIcon(img_path))
+    show_config_editor()
+    sys.exit(0)
 
 
 def _get_wizard_image_path():
