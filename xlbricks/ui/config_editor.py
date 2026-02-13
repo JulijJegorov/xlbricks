@@ -46,7 +46,7 @@ def load_config(path):
 
 def _default_config():
     return {
-        'INTERPRETER': '',
+        'APPS_PATH': '',
         'PYTHONPATH': '',
         'CONTEXT': {},
     }
@@ -55,7 +55,8 @@ def _default_config():
 def _normalize_config(data):
     """Ensure required keys exist."""
     out = _default_config()
-    out['INTERPRETER'] = data.get('INTERPRETER', '')
+    # APPS_PATH: path to xlbricks applications (e.g. .../technology/apps)
+    out['APPS_PATH'] = data.get('APPS_PATH', data.get('INTERPRETER', ''))
     out['PYTHONPATH'] = data.get('PYTHONPATH', '')
     out['CONTEXT'] = dict(data.get('CONTEXT', {}))
     return out
@@ -82,21 +83,21 @@ class ConfigEditorDialog(QDialog):
     def _build_ui(self):
         layout = QVBoxLayout(self)
 
-        # --- Interpreter ---
-        grp_interpreter = QGroupBox('Python interpreter')
-        grp_interpreter.setToolTip('Path to pythonw.exe or python.exe used by the add-in')
-        fl_interpreter = QFormLayout(grp_interpreter)
-        self._interpreter_edit = QLineEdit()
-        self._interpreter_edit.setPlaceholderText(r'C:\...\pythonw.exe')
-        self._interpreter_edit.setMinimumWidth(320)
-        btn_browse = QPushButton('Browse...')
-        btn_browse.setMaximumWidth(90)
-        btn_browse.clicked.connect(self._browse_interpreter)
+        # --- XLBricks applications path ---
+        grp_apps = QGroupBox('XLBricks applications path')
+        grp_apps.setToolTip("Folder containing xlbricks applications. Files will be access with 'Load Apps'")
+        fl_apps = QFormLayout(grp_apps)
+        self._apps_path_edit = QLineEdit()
+        self._apps_path_edit.setPlaceholderText('Path to apps')
+        self._apps_path_edit.setMinimumWidth(320)
+        btn_browse_apps = QPushButton('Browse...')
+        btn_browse_apps.setMaximumWidth(90)
+        btn_browse_apps.clicked.connect(self._browse_apps_path)
         row = QHBoxLayout()
-        row.addWidget(self._interpreter_edit)
-        row.addWidget(btn_browse)
-        fl_interpreter.addRow('Path:', row)
-        layout.addWidget(grp_interpreter)
+        row.addWidget(self._apps_path_edit)
+        row.addWidget(btn_browse_apps)
+        fl_apps.addRow('Path:', row)
+        layout.addWidget(grp_apps)
 
         # --- PYTHONPATH ---
         grp_path = QGroupBox('PYTHONPATH')
@@ -165,15 +166,14 @@ class ConfigEditorDialog(QDialog):
         btn_layout.addWidget(self._cancel_btn)
         layout.addLayout(btn_layout)
 
-    def _browse_interpreter(self):
-        path, _ = QFileDialog.getOpenFileName(
+    def _browse_apps_path(self):
+        path = QFileDialog.getExistingDirectory(
             self,
-            'Select Python interpreter',
-            os.path.expanduser('~'),
-            'Executables (*.exe);;All files (*)',
+            'Select XLBricks applications folder',
+            self._apps_path_edit.text() or os.path.expanduser('~'),
         )
         if path:
-            self._interpreter_edit.setText(path)
+            self._apps_path_edit.setText(path)
 
     def _add_context_row(self):
         row = self._context_table.rowCount()
@@ -205,7 +205,7 @@ class ConfigEditorDialog(QDialog):
 
     def _load_into_ui(self):
         data = load_config(self._config_path)
-        self._interpreter_edit.setText(data.get('INTERPRETER', ''))
+        self._apps_path_edit.setText(data.get('APPS_PATH', ''))
         path_str = data.get('PYTHONPATH', '')
         # Support both newline and semicolon separation
         if ';' in path_str and '\n' not in path_str:
@@ -242,18 +242,28 @@ class ConfigEditorDialog(QDialog):
             if name:
                 ctx[name] = mod
         return {
-            'INTERPRETER': self._interpreter_edit.text().strip(),
+            'APPS_PATH': self._apps_path_edit.text().strip(),
             'PYTHONPATH': path_sep.join(paths),
             'CONTEXT': ctx,
         }
 
     def _save(self):
-        data = self._collect_from_ui()
         try:
+            # Merge UI data into existing config so we don't remove keys we don't edit (e.g. INTERPRETER)
+            existing = {}
+            if osp.isfile(self._config_path):
+                try:
+                    with open(self._config_path, 'r', encoding='utf-8') as f:
+                        existing = json.load(f)
+                except Exception:
+                    pass
+            data = self._collect_from_ui()
+            for key, value in data.items():
+                existing[key] = value
             dir_path = osp.dirname(self._config_path)
             if dir_path and not osp.isdir(dir_path):
                 os.makedirs(dir_path, exist_ok=True)
-            save_config(self._config_path, data)
+            save_config(self._config_path, existing)
             QMessageBox.information(self, 'Saved', 'Config saved to:\n' + self._config_path)
             self.accept()
         except Exception as e:
