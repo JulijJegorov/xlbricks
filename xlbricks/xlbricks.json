@@ -1,7 +1,8 @@
-{"INTERPRETER":"C:\\Users\\julij\\virtualenv\\MLDS\\Scripts\\pythonw.exe",
-"PYTHONPATH": "C:\\Users\\julij\\OneDrive\\Documents\\MyDocuments\\Coding\\python\\trunk\\QuantResearch\\xlbricks\\xlbricks;C:\\Users\\julij\\OneDrive\\Documents\\MyDocuments\\Coding\\python\\trunk\\QuantResearch\\xlbricks;C:\\Users\\julij\\OneDrive\\Documents\\MyDocuments\\Coding\\python\\xlbricksmodels",
-"CONTEXT": {
-    "QuantSpaceContext": "QuantSpace.apps.context",
-    "DashboardContext": "dashboard.context"
-	}
+{
+    "INTERPRETER": "C:\\Users\\julij\\virtualenv\\optionchain\\Scripts\\pythonw.exe",
+    "PYTHONPATH": "C:\\Users\\julij\\OneDrive\\Documents\\MyDocuments\\Coding\\python\\xlbricksmodels",
+    "CONTEXT": {
+        "QuantSpaceContext": "QuantSpace.apps.context",
+        "DashboardContext": "dashboard.context"
+    }
 }
