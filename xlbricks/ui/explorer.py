@@ -101,7 +101,7 @@ class Explorer(QWidget):
             self._table_view.refresh(None)
 
     def display(self):
-        self.setWindowTitle('wizard')
+        self.setWindowTitle('Object Viewer')
         self.setMinimumSize(600, 400)
         self._tree_view.clicked.connect(self.load_data_frame)
         self._tree_view.keyPressedNavigation.connect(self.load_data_frame)
@@ -115,7 +115,7 @@ class Explorer(QWidget):
         self.show()
 
     def display_one_element(self):
-        self.setWindowTitle('wizard')
+        self.setWindowTitle('Object Viewer')
         self.setMinimumSize(200, 300)
         self._tree_view.clicked.connect(self.load_data_frame)
         self._tree_view.keyPressedNavigation.connect(self.load_data_frame)

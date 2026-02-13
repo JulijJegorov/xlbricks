@@ -74,9 +74,9 @@ class ConfigEditorDialog(QDialog):
     def __init__(self, config_path=None, parent=None):
         super(ConfigEditorDialog, self).__init__(parent)
         self._config_path = config_path or get_default_config_path()
-        self.setWindowTitle('XLBricks Config')
+        self.setWindowTitle('XLBricks Settings')
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window)
-        self.setMinimumSize(520, 480)
+        self.setMinimumSize(520, 500)
         self._build_ui()
         self._load_into_ui()
 

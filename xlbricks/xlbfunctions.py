@@ -161,8 +161,8 @@ def xlb_clear_bricks_front():
 @xw.func
 def xlb_open_bricks_explorer():
     explorer_app = QApplication(sys.argv)
-    img_path = _get_wizard_image_path()
-    explorer_app.setWindowIcon((QIcon(img_path)))
+    img_path = _get_image_path('stars.png')
+    explorer_app.setWindowIcon(QIcon(img_path))
     model = DictionaryTreeModel(node_structure_from_dict(XLBricksFrontStack().to_dict()))
     wizard = Explorer(model)
     wizard.display()
@@ -176,8 +176,8 @@ def xlb_open_brick_explorer(data):
         key = ''.join(data[0, 0].split(':')[:-1])
         element = XLUtils.get_bricks(data)
         explorer_app = QApplication(sys.argv)
-        img_path = _get_wizard_image_path()
-        explorer_app.setWindowIcon((QIcon(img_path)))
+        img_path = _get_image_path('stars.png')
+        explorer_app.setWindowIcon(QIcon(img_path))
         model = DictionaryTreeModel(node_structure_from_dict({key: element.to_dict()}))
         wizard = Explorer(model)
         wizard.display_one_element()
@@ -188,15 +188,30 @@ def xlb_open_brick_explorer(data):
 def xlb_open_config_editor():
     """Open the XLBricks config editor UI (same as XLBricks Wizard, from Excel)."""
     config_app = QApplication(sys.argv)
-    img_path = _get_wizard_image_path()
-    if osp.isfile(img_path):
-        config_app.setWindowIcon(QIcon(img_path))
+    img_path = _get_image_path('settings.png')
+    config_app.setWindowIcon(QIcon(img_path))
     show_config_editor()
     sys.exit(0)
 
 
-def _get_wizard_image_path():
-    return osp.join(osp.dirname(sys.modules[__name__].__file__), 'img/wizard.png')
+def _get_package_dir():
+    """Return the absolute path to the xlbricks package directory (where xlbfunctions.py lives)."""
+    this_file = getattr(sys.modules[__name__], '__file__', None)
+    if not this_file:
+        return ''
+    return osp.abspath(osp.dirname(this_file))
+
+
+def _get_image_path(name: str):
+    """Return path to an icon from the imgs folder. Works when run from Excel (uses absolute path)."""
+    pkg_dir = _get_package_dir()
+    if not pkg_dir:
+        return ''
+    imgs_dir = osp.join(pkg_dir, 'imgs')
+    path = osp.join(imgs_dir, name)
+    if osp.isfile(path):
+        return path
+    return ''
 
 
 if __name__ == '__main__':
