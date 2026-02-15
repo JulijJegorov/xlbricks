@@ -1,7 +1,8 @@
 """
-    Author: julij
-    Date: 05/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: XLUtils (get_bricks, crop_range, etc.), XLBricksFunction decorator,
+                 and XLBricksUtils; bridges Excel ranges to brick structures.
 """
 
 import numpy as np

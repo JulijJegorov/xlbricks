@@ -1,7 +1,7 @@
 """
-    Author: julij
-    Date: 02/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: XLBricksFront: wrapper around xlbricks with alias, persist flag, and counter.
 """
 
 import uuid

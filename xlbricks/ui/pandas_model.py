@@ -1,3 +1,9 @@
+"""
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Qt table model for pandas DataFrames; used by Explorer detail view.
+"""
+
 from PyQt5 import QtCore
 import pandas as pd
 import numpy as np

@@ -1,3 +1,9 @@
+"""
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Tree node for key-value hierarchies; used by DictionaryTreeModel.
+"""
+
 
 class Node(object):
 

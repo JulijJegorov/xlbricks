@@ -1,6 +1,8 @@
 """
-PyQt UI for editing xlbricks.json configuration.
-Loaded from Excel in the same way as XLBricks Wizard.
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: PyQt UI for editing xlbricks.json configuration;
+                 loaded from Excel (e.g. XLBricks config editor / Wizard).
 """
 
 import json

@@ -1,7 +1,8 @@
 """
-    Author: julij
-    Date: 02/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: XLBrick and XLBricks data structures; in-memory representation
+                 of Excel ranges and nested key-value bricks (incl. QuantLib helpers).
 """
 
 import abc

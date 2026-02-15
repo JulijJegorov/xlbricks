@@ -1,7 +1,8 @@
 """
-    Author: julij
-    Date: 05/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Excel UDF (User Defined Function) entry points for XLBricks;
+                 exposes xlb_* functions to Excel via xlwings and delegates to xlfunctions.
 """
 
 import sys

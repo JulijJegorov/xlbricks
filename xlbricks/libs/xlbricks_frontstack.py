@@ -1,7 +1,7 @@
 """
-    Author: julij
-    Date: 02/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Singleton stack of XLBricksFront instances; tracks bricks by alias/UUID.
 """
 
 from xlbricks.libs.xlbricks_front import XLBricksFront

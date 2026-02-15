@@ -1,3 +1,8 @@
+"""
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Qt tree model for an arbitrary dictionary; used by Explorer.
+"""
 
 import pandas as pd
 from xlbricks.ui.node import Node

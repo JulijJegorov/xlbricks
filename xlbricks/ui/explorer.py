@@ -1,3 +1,10 @@
+"""
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: PyQt Explorer window to browse the XLBricks front stack
+                 (tree view and table); opened from Excel.
+"""
+
 import numpy as np
 import pandas as pd
 from PyQt5 import QtCore

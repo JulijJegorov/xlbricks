@@ -1,7 +1,8 @@
 """
-    Author: julij
-    Date: 05/10/2022
-    Description: 
+    Author: julij.jegorov
+    Date: 15/02/2026
+    Description: Core XLBricks operations: create bricks/arrays/tables/grids,
+                 run user-defined functions, lookup, merge; used by xlbfunctions.
 """
 import numpy as np
 import pandas as pd
