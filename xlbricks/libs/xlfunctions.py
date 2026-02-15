@@ -117,6 +117,26 @@ def flatten_bricks(bricks):
     return xlbricks_value
 
 
+def _func_line_sanitize(cell):
+    """Return a safe string for a code cell; empty/nan cells become '' so exec() never sees 'nan'.
+    Preserves leading whitespace (indentation) so Python blocks stay valid."""
+    if cell is None:
+        return ''
+    if isinstance(cell, (float, np.floating)) and np.isnan(cell):
+        return ''
+    try:
+        if pd.isnull(cell):
+            return ''
+    except (TypeError, ValueError):
+        pass
+    s = str(cell) if isinstance(cell, str) else str(cell)
+    if not s.strip():
+        return ''
+    if s.strip().lower() == 'nan':
+        return ''
+    return s
+
+
 @XLBricksFunction(False)
 def create_function_objects(funcs, persist=True, xlapp=None):
 
@@ -125,11 +145,21 @@ def create_function_objects(funcs, persist=True, xlapp=None):
 
     funcs_mask = list()
     for row in funcs:
-        first_char = row[0].split(' ')[0]
+        line = _func_line_sanitize(row[0])
+        first_char = line.split(' ')[0] if line else ''
         funcs_mask.append(first_char == 'from' or first_char == 'import' or first_char == 'def')
 
     funcs_split_t = np.array_split(funcs[:, 0], np.argwhere(funcs_mask).flatten())
-    funcs_split = ['\n'.join(func) for func in funcs_split_t[1:]]
+    funcs_split = ['\n'.join(_func_line_sanitize(line) for line in func) for func in funcs_split_t[1:]]
+
+    # Ensure blocks ending with ':' (def/class/if/for etc.) have at least one indented line
+    def _ensure_block_has_body(code):
+        stripped = code.rstrip()
+        if stripped.endswith(':'):
+            return code + '\n    pass'
+        return code
+
+    funcs_split = [_ensure_block_has_body(block) for block in funcs_split]
 
     res = dict()
     [exec(func, res) for func in funcs_split]
