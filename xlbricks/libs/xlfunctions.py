@@ -296,16 +296,6 @@ def create_bricks_front(xlbricks, xlapp, persist):
     return xlbricks_front
 
 
-# CONTEXT_OBJECTS = {
-#     'QuantLibContext': 'QuantLibW.apps.context',
-#     'CRTModelContext': 'CRTModel.apps.context',
-#     'DealroomContext': 'Dealroom.apps.context',
-#     'QuantSpaceContext': 'QuantSpace.apps.context',
-#     'DigitalAssetsContext': 'DigitalAssets.apps.context',
-#     'AlphaTrendContext': 'AlphaTrend.apps.context'
-# }
-
-
 def get_context_object(class_name: str, class_path: str) -> object:
     module = importlib.import_module(class_path)
     class_object = getattr(module, class_name)
