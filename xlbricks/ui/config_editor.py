@@ -78,8 +78,7 @@ class ConfigEditorDialog(QDialog):
         self._config_path = config_path or get_default_config_path()
         self.setWindowTitle('XLBricks Settings')
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Window)
-        # Width 20% larger than previous 520
-        self.setMinimumSize(650, 500)
+        self.setMinimumSize(650, 600)
         self.resize(650, 500)
         self._build_ui()
         self._load_into_ui()
@@ -135,7 +134,6 @@ class ConfigEditorDialog(QDialog):
         self._context_table = QTableWidget()
         self._context_table.setColumnCount(2)
         self._context_table.setHorizontalHeaderLabels(['Context name', 'Module path'])
-        # Context name column 20% wider than default (~150px) -> 180px
         self._context_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
         self._context_table.setColumnWidth(0, 180)
         self._context_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
