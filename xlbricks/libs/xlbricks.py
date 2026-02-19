@@ -13,6 +13,10 @@ from collections import OrderedDict
 
 
 class XLBrickAbstract(metaclass=abc.ABCMeta):
+    """Base class for brick data structures.
+    
+    Defines the interface for accessing and serializing brick data.
+    """
 
     @abc.abstractmethod
     def __getitem__(self):
@@ -24,11 +28,20 @@ class XLBrickAbstract(metaclass=abc.ABCMeta):
 
 
 class XLBricks(XLBrickAbstract):
+    """A collection of nested bricks organized as key-value pairs.
+    
+    Supports hierarchical structures where bricks can contain other bricks.
+    """
+    
     def __init__(self, key=None, bricks=None):
         self.key = key
         self.bricks = bricks or OrderedDict()
 
     def replace(self, keys, brick):
+        """Replace a brick at a specific path in the hierarchy.
+        
+        Keys is a list representing the path to the brick to replace.
+        """
         xl_brick = self.__getitem__(keys)
         if xl_brick is None:
             raise ValueError('brick not found at %s' % keys)
@@ -52,6 +65,10 @@ class XLBricks(XLBrickAbstract):
         return node
 
     def to_dict(self):
+        """Convert the brick collection to a nested dictionary.
+        
+        Recursively serializes all child bricks.
+        """
         child_dict = OrderedDict()
         for key, qd_item in self.bricks.items():
             child_dict[key] = qd_item.to_dict()
@@ -62,6 +79,10 @@ class XLBricks(XLBrickAbstract):
             return OrderedDict([(self.key, child_dict)])
 
     def to_quantlib_dict(self):
+        """Convert to dictionary with QuantLib-compatible types.
+        
+        Transforms dates, strings, and numeric values into QuantLib objects.
+        """
         f = np.vectorize(_cast_quantlib_variable)
         child_dict = OrderedDict()
         for key, qd_item in self.bricks.items():
@@ -74,6 +95,10 @@ class XLBricks(XLBrickAbstract):
 
 
 class XLBrick(XLBrickAbstract):
+    """A single brick containing a value (array, scalar, or object).
+    
+    The fundamental data unit in XLBricks, wrapping any type of data.
+    """
 
     def __init__(self, key=None, value=None):
         self.key = key
@@ -83,11 +108,19 @@ class XLBrick(XLBrickAbstract):
         pass
 
     def to_dict(self):
+        """Convert the brick to a dictionary or return its raw value.
+        
+        Returns the value directly if no key is set, otherwise returns {key: value}.
+        """
         if self.key is None:
             return self.value
         return OrderedDict([(self.key, self.value)])
 
     def to_quantlib_dict(self):
+        """Convert brick value to QuantLib-compatible format.
+        
+        Handles date conversion, type casting, and QuantLib object preservation.
+        """
         if 'QuantLib' in str(type(self.value)):
             return self.value
 
@@ -112,6 +145,10 @@ class XLBrick(XLBrickAbstract):
 
 
 def _cast_quantlib_variable(x):
+    """Convert Python values to QuantLib types.
+    
+    Handles datetime to ql.Date conversion, string evaluation, and type coercion.
+    """
     if isinstance(x, datetime):
         return ql.Date(x.day, x.month, x.year)
     elif isinstance(x, float) and x.is_integer():

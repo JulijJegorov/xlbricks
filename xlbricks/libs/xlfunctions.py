@@ -16,6 +16,10 @@ from xlbricks.libs.utility_functions import XLUtils, XLBricksUtils, XLBricksFunc
 
 @XLBricksFunction(False)
 def xlbrick_create(key, data, persist=True, xlapp=None):
+    """Create a single named brick from data.
+    
+    Internal function called by xlb_brick Excel function.
+    """
     xlbricks = XLBricks()
     xlbricks[key] = XLUtils.get_bricks(data)
 
@@ -27,6 +31,10 @@ def xlbrick_create(key, data, persist=True, xlapp=None):
 def xlbricks_create(key_1, brick_1, key_2=None, brick_2=None, key_3=None, brick_3=None,
                     key_4=None, brick_4=None, key_5=None, brick_5=None, key_6=None, brick_6=None,
                     key_7=None, brick_7=None, key_8=None, brick_8=None, persist=True, xlapp=None):
+    """Create multiple named bricks in one operation.
+    
+    Internal function called by xlb_bricks Excel function.
+    """
 
     xlbricks = XLBricks()
     for idx in range(1, 9):
@@ -41,6 +49,10 @@ def xlbricks_create(key_1, brick_1, key_2=None, brick_2=None, key_3=None, brick_
 
 @XLBricksFunction(False)
 def array_create(data, persist=True, xlapp=None):
+    """Create a brick containing array data.
+    
+    Stores the data as-is without modification.
+    """
     xlbricks = XLUtils.get_bricks(data)
     xlbricks_front = create_bricks_front(xlbricks, xlapp, persist)
     return xlbricks_front
@@ -48,6 +60,10 @@ def array_create(data, persist=True, xlapp=None):
 
 @XLBricksFunction(False)
 def list_create(data, persist=True, xlapp=None):
+    """Create a brick containing a flattened list.
+    
+    Converts 2D ranges into 1D Python lists.
+    """
     xlbricks = XLUtils.get_bricks(data)
     if isinstance(xlbricks.value, np.ndarray):
         xlbricks.value = xlbricks.value.flatten().tolist()
@@ -60,6 +76,10 @@ def list_create(data, persist=True, xlapp=None):
 
 @XLBricksFunction(False)
 def table_create(data, columns=None, index=None, persist=True, xlapp=None):
+    """Create a pandas DataFrame brick with optional headers and index.
+    
+    Enables structured table operations on Excel data.
+    """
 
     data_brick = XLUtils.get_bricks(data)
 
@@ -78,6 +98,10 @@ def table_create(data, columns=None, index=None, persist=True, xlapp=None):
 
 @XLBricksFunction(False)
 def grid_create(data, persist=True, xlapp=None):
+    """Parse a grid where column 1 has keys and remaining columns have values.
+    
+    Creates multiple bricks from a single structured range.
+    """
     xlbricks = XLBricks()
 
     if data.dtype.type is np.str_:
@@ -98,6 +122,10 @@ def grid_create(data, persist=True, xlapp=None):
 
 @XLBricksFunction(False)
 def lookup_element(bricks, keys=None, persist=True, xlapp=None):
+    """Navigate to a nested brick using a slash-separated path.
+    
+    Example: 'parent/child' retrieves the child brick from parent.
+    """
     xlbricks = XLUtils.get_bricks(bricks)
     keys = [key.strip(' \t\n\r') for key in keys.split('/')]
     xlbricks_front = create_bricks_front(xlbricks[keys], xlapp, persist)
@@ -106,6 +134,10 @@ def lookup_element(bricks, keys=None, persist=True, xlapp=None):
 
 @XLBricksFunction(True)
 def flatten_bricks(bricks):
+    """Extract raw data from a brick as a numpy array.
+    
+    Returns the underlying value without brick metadata.
+    """
     xlbricks = XLUtils.get_bricks(bricks)
     xlbricks_value = xlbricks.value
 
@@ -119,8 +151,10 @@ def flatten_bricks(bricks):
 
 
 def _func_line_sanitize(cell):
-    """Return a safe string for a code cell; empty/nan cells become '' so exec() never sees 'nan'.
-    Preserves leading whitespace (indentation) so Python blocks stay valid."""
+    """Clean a cell value for safe Python code execution.
+    
+    Converts empty/NaN cells to empty strings while preserving indentation.
+    """
     if cell is None:
         return ''
     if isinstance(cell, (float, np.floating)) and np.isnan(cell):
@@ -140,6 +174,10 @@ def _func_line_sanitize(cell):
 
 @XLBricksFunction(False)
 def create_function_objects(funcs, persist=True, xlapp=None):
+    """Parse and execute Python function definitions from Excel cells.
+    
+    Allows defining custom functions directly in Excel ranges.
+    """
 
     funcs = XLUtils.get_bricks(funcs)
     funcs = np.array([[funcs.value]] if isinstance(funcs.value, str) else funcs.value)
@@ -171,6 +209,10 @@ def create_function_objects(funcs, persist=True, xlapp=None):
 
 @XLBricksFunction(True)
 def create_context_object(context_name, context_path, args=None, persist=True, xlapp=None):
+    """Instantiate a Python class from a module path.
+    
+    Creates objects like QuantLib contexts with optional constructor arguments.
+    """
 
     context = get_context_object(context_name, context_path)
     if args is None:
@@ -185,6 +227,10 @@ def create_context_object(context_name, context_path, args=None, persist=True, x
 
 @XLBricksFunction(True)
 def run_function(function_objects, function_name, args=None, persist=True, xlapp=None):
+    """Execute a stored function by name with optional arguments.
+    
+    Runs functions created with xlb_create_function or stored in bricks.
+    """
     function_objects = XLUtils.get_bricks(function_objects)
     function_object = function_objects[[function_name]].value
 
@@ -212,6 +258,10 @@ def run_function(function_objects, function_name, args=None, persist=True, xlapp
 
 @XLBricksFunction(True)
 def run_quantlib_function(quantlib_objects, function_name, args=None, persist=True, xl_app=None):
+    """Call a method on a QuantLib object with optional arguments.
+    
+    Enables financial calculations using QuantLib library methods.
+    """
 
     quantlib_objects = XLUtils.get_bricks(quantlib_objects)
     func = getattr(quantlib_objects.value, function_name)
@@ -243,6 +293,10 @@ def flatten_element(brick):
 @XLBricksFunction(False)
 def merge_elements(brick_1=None, brick_2=None, brick_3=None, brick_4=None,
                    brick_5=None, persist=True, xlapp=None):
+    """Combine multiple bricks into a single collection.
+    
+    Merges all key-value pairs from input bricks.
+    """
     xlbricks = XLBricks()
     for idx in range(1, 6):
         brick = locals().get('brick_%s' % idx, None)
@@ -255,6 +309,10 @@ def merge_elements(brick_1=None, brick_2=None, brick_3=None, brick_4=None,
 @XLBricksFunction(False)
 def replace_elements(bricks, key_1, brick_1, key_2=None, brick_2=None, key_3=None, brick_3=None,
                      key_4=None, brick_4=None, key_5=None, brick_5=None, persist=False, xlapp=None):
+    """Update specific values in a brick collection.
+    
+    Replaces bricks at specified paths while keeping the rest unchanged.
+    """
 
     xlbricks = deepcopy(XLUtils.get_bricks(bricks))
     xlbricks.alias = None
@@ -273,6 +331,10 @@ def replace_elements(bricks, key_1, brick_1, key_2=None, brick_2=None, key_3=Non
 
 @XLBricksFunction(False)
 def assign_alias(bricks, alias):
+    """Give a custom name to a brick for easier referencing.
+    
+    Creates a memorable alias instead of using cell addresses.
+    """
     xlbricks = XLUtils.get_bricks(bricks)
     xlbricks_front = XLBricksFront(alias, xlbricks, True)
     return xlbricks_front
@@ -280,15 +342,27 @@ def assign_alias(bricks, alias):
 
 @XLBricksFunction(True)
 def delete_bricks(bricks):
+    """Remove a brick from memory.
+    
+    Frees up the storage used by the specified brick.
+    """
     XLUtils.delete_element(bricks)
     return 'DELETED FROM MEMORY'
 
 
 def clear_bricks_front():
+    """Clear all bricks from the front stack.
+    
+    Removes all stored bricks from memory.
+    """
     XLBricksFrontStack().clear()
 
 
 def create_bricks_front(xlbricks, xlapp, persist):
+    """Wrap bricks in a front object with persistence tracking.
+    
+    Associates bricks with their Excel cell location if persist is True.
+    """
     if persist:
         cell_address = XLUtils.active_cell_address(xlapp)
     else:
@@ -298,11 +372,19 @@ def create_bricks_front(xlbricks, xlapp, persist):
 
 
 def get_context_object(class_name: str, class_path: str) -> object:
+    """Import and return a class from a module path.
+    
+    Dynamically loads Python classes for instantiation.
+    """
     module = importlib.import_module(class_path)
     class_object = getattr(module, class_name)
     return class_object
 
 def _run_quantlib_function(func, args_dict):
+    """Execute a QuantLib function with arguments as kwargs or positional args.
+    
+    Tries keyword arguments first, falls back to positional if that fails.
+    """
     try:
         return func(**args_dict)
     except TypeError:

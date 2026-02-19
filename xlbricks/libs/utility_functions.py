@@ -13,14 +13,23 @@ from xlbricks.libs.xlbricks_frontstack import XLBricksFrontStack, add_bricks_to_
 
 
 class XLBricksFunction(object):
-    """Decorator for xlfunctions: registers result in the front stack and returns brick reference."""
+    """Decorator that wraps functions to automatically manage brick storage and references.
+    
+    Registers results in the front stack and returns brick references for Excel.
+    """
 
     def __init__(self, is_dynamic: bool = False):
-        """Set is_dynamic: if True, return raw output when it is not an XLBricksFront."""
+        """Initialize the decorator.
+        
+        If is_dynamic is True, returns raw output for non-brick results instead of wrapping them.
+        """
         self.is_dynamic = is_dynamic
 
     def __call__(self, f):
-        """Wrap f: on success add result to front stack and return bricks_full_name (or raw if dynamic)."""
+        """Apply the decorator to a function.
+        
+        Wraps the function to add results to the front stack and return references.
+        """
         def wrap(*args, **kwargs):
             xl_output = f(*args, **kwargs)
             if self.is_dynamic and not isinstance(xl_output, XLBricksFront):
@@ -32,11 +41,17 @@ class XLBricksFunction(object):
 
 
 class XLUtils(object):
-    """Static helpers to convert Excel range data to bricks and manage the front stack."""
+    """Utilities for converting Excel ranges to bricks and managing brick references.
+    
+    Handles data cropping, type conversion, and front stack lookups.
+    """
 
     @staticmethod
     def get_bricks_front(data):
-        """Return the XLBricksFront for a 1x1 range containing a bricks reference (alias:counter), else None."""
+        """Look up a brick by its reference string.
+        
+        Expects a 1x1 cell containing 'alias:counter' format.
+        """
         if XLUtils.is_bricks_front_name(data):
             key = ''.join(data[0, 0].split(':')[:-1])
             return XLBricksFrontStack()[key]
@@ -45,7 +60,10 @@ class XLUtils(object):
 
     @staticmethod
     def get_bricks(data):
-        """Convert Excel range to XLBrick or XLBricks: crop empty edges, resolve references, coerce types."""
+        """Convert Excel range data into brick objects.
+        
+        Automatically crops empty cells, resolves brick references, and converts data types.
+        """
         data = XLUtils.crop_range(data)
         bricks_front = XLUtils.get_bricks_front(data)
         if bricks_front is None:
@@ -58,14 +76,20 @@ class XLUtils(object):
 
     @staticmethod
     def delete_bricks(data):
-        """Remove the bricks front entry for the given 1x1 reference range (alias:counter)."""
+        """Delete a brick from memory using its reference.
+        
+        Expects a 1x1 cell containing the brick reference to remove.
+        """
         if XLUtils.is_bricks_front_name(data):
             key = ''.join(data[0, 0].split(':')[:-1])
             del XLBricksFrontStack()[key]
 
     @staticmethod
     def is_bricks_front_name(data):
-        """Return True if data is a 1x1 cell containing a string with ':' (bricks reference)."""
+        """Check if data contains a brick reference string.
+        
+        Returns True if it's a 1x1 cell with a colon-separated reference.
+        """
         if data.shape == (1, 1) and isinstance(data[0, 0], str) and ':' in data[0, 0]:
             return True
         else:
@@ -73,7 +97,10 @@ class XLUtils(object):
 
     @staticmethod
     def crop_range(data):
-        """Remove leading/trailing rows and columns that are entirely empty (nan/null)."""
+        """Trim empty rows and columns from all edges of a data range.
+        
+        Automatically detects and removes surrounding empty cells.
+        """
         if data.dtype.type is np.str_:
             return XLUtils._crop_range(data, lambda x: x == 'nan')
         elif data.dtype.type is np.object_:
@@ -83,7 +110,10 @@ class XLUtils(object):
 
     @staticmethod
     def _crop_range(data, func_isnan):
-        """Strip fully empty rows/columns from all four sides using func_isnan to detect empty cells."""
+        """Internal helper to crop range using a custom empty-cell detection function.
+        
+        Removes empty rows and columns from all four edges.
+        """
         while func_isnan(data[0, :]).all():
             data = np.delete(data, 0, axis=0)
 
@@ -106,7 +136,10 @@ class XLUtils(object):
 
     @staticmethod
     def active_cell_address(xl_app):
-        """Return full address of the calling cell as '[Workbook]Sheet!Address' (e.g. for persistence)."""
+        """Get the full address of the cell calling the function.
+        
+        Returns format: '[Workbook]Sheet!Address' for persistence tracking.
+        """
         active_cell = xl_app.Caller
         worksheet = active_cell.Parent
         workbook = worksheet.Parent
@@ -115,11 +148,17 @@ class XLUtils(object):
 
 
 class XLBricksUtils(object):
-    """Static helpers to build XLBricks/XLBrick from Python dicts and lists."""
+    """Utilities for converting Python data structures into brick objects.
+    
+    Handles dictionaries and lists, creating appropriate brick hierarchies.
+    """
 
     @staticmethod
     def element_from_dictionary(input_data):
-        """Convert a nested dictionary to XLBricks; dict values become bricks, nested dicts recurse."""
+        """Convert a nested dictionary into a brick hierarchy.
+        
+        Each key-value pair becomes a brick, with nested dicts creating sub-bricks.
+        """
 
         qd_element = XLBricks()
         for key, data in input_data.items():
@@ -132,7 +171,10 @@ class XLBricksUtils(object):
 
     @staticmethod
     def element_from_list(input_data, key_prefix):
-        """Convert a list to XLBricks with keys key_prefix_1, key_prefix_2, ..."""
+        """Convert a list into numbered bricks.
+        
+        Creates bricks with keys like 'prefix_1', 'prefix_2', etc.
+        """
 
         qd_element = XLBricks()
         for idx, res in enumerate(input_data, 1):

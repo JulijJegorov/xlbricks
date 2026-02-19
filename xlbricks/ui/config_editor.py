@@ -29,7 +29,10 @@ from PyQt5.QtCore import Qt
 
 
 def get_default_config_path():
-    """Return the path to xlbricks.json in the xlbricks package directory."""
+    """Get the default location of the xlbricks configuration file.
+    
+    Returns the path to xlbricks.json in the package directory.
+    """
     pkg_dir = osp.dirname(osp.dirname(osp.abspath(__file__)))
     return osp.join(pkg_dir, 'xlbricks.json')
 
@@ -47,6 +50,10 @@ def load_config(path):
 
 
 def _default_config():
+    """Return default configuration structure.
+    
+    Provides empty values for all required config keys.
+    """
     return {
         'APPS_PATH': '',
         'PYTHONPATH': '',
@@ -55,7 +62,10 @@ def _default_config():
 
 
 def _normalize_config(data):
-    """Ensure required keys exist."""
+    """Ensure all required configuration keys exist.
+    
+    Fills in missing keys with defaults for backward compatibility.
+    """
     out = _default_config()
     # APPS_PATH: path to xlbricks applications (e.g. .../technology/apps)
     out['APPS_PATH'] = data.get('APPS_PATH', data.get('INTERPRETER', ''))
@@ -65,15 +75,25 @@ def _normalize_config(data):
 
 
 def save_config(path, data):
-    """Save config to JSON file."""
+    """Write configuration to a JSON file.
+    
+    Saves with proper formatting and UTF-8 encoding.
+    """
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 class ConfigEditorDialog(QDialog):
-    """User-friendly dialog to edit xlbricks.json."""
+    """Interactive dialog for editing XLBricks settings.
+    
+    Provides a user-friendly interface for managing paths, Python paths, and contexts.
+    """
 
     def __init__(self, config_path=None, parent=None):
+        """Initialize the config editor dialog.
+        
+        Opens the specified config file or uses the default xlbricks.json.
+        """
         super(ConfigEditorDialog, self).__init__(parent)
         self._config_path = config_path or get_default_config_path()
         self.setWindowTitle('XLBricks Settings')
@@ -84,6 +104,7 @@ class ConfigEditorDialog(QDialog):
         self._load_into_ui()
 
     def _build_ui(self):
+        """Construct the dialog UI with all input fields and buttons."""
         layout = QVBoxLayout(self)
 
         # --- XLBricks applications path ---
@@ -172,6 +193,7 @@ class ConfigEditorDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def _browse_apps_path(self):
+        """Open a folder picker for selecting the apps directory."""
         path = QFileDialog.getExistingDirectory(
             self,
             'Select XLBricks applications folder',
@@ -181,22 +203,26 @@ class ConfigEditorDialog(QDialog):
             self._apps_path_edit.setText(path)
 
     def _add_context_row(self):
+        """Add a new empty row to the context mapping table."""
         row = self._context_table.rowCount()
         self._context_table.insertRow(row)
         self._context_table.setItem(row, 0, QTableWidgetItem(''))
         self._context_table.setItem(row, 1, QTableWidgetItem(''))
 
     def _remove_context_row(self):
+        """Delete the selected row from the context table."""
         row = self._context_table.currentRow()
         if row >= 0:
             self._context_table.removeRow(row)
 
     def _add_path_row(self):
+        """Add a new empty row to the PYTHONPATH table."""
         row = self._path_table.rowCount()
         self._path_table.insertRow(row)
         self._path_table.setItem(row, 0, QTableWidgetItem(''))
 
     def _browse_path_row(self):
+        """Open a folder picker and add the selected path to PYTHONPATH."""
         path = QFileDialog.getExistingDirectory(self, 'Select folder to add to PYTHONPATH')
         if path:
             row = self._path_table.rowCount()
@@ -204,11 +230,13 @@ class ConfigEditorDialog(QDialog):
             self._path_table.setItem(row, 0, QTableWidgetItem(path))
 
     def _remove_path_row(self):
+        """Delete the selected row from the PYTHONPATH table."""
         row = self._path_table.currentRow()
         if row >= 0:
             self._path_table.removeRow(row)
 
     def _load_into_ui(self):
+        """Populate UI fields with values from the config file."""
         data = load_config(self._config_path)
         self._apps_path_edit.setText(data.get('APPS_PATH', ''))
         path_str = data.get('PYTHONPATH', '')
@@ -231,6 +259,10 @@ class ConfigEditorDialog(QDialog):
             self._context_table.setItem(row, 1, QTableWidgetItem(mod))
 
     def _collect_from_ui(self):
+        """Gather all values from UI fields into a config dictionary.
+        
+        Prepares data for saving to the config file.
+        """
         paths = []
         for r in range(self._path_table.rowCount()):
             item = self._path_table.item(r, 0)
@@ -282,6 +314,9 @@ class ConfigEditorDialog(QDialog):
 
 
 def show_config_editor(config_path=None, parent=None):
-    """Show the config editor dialog. Returns True if saved, False if cancelled."""
+    """Display the configuration editor dialog.
+    
+    Returns True if user saved changes, False if cancelled.
+    """
     dlg = ConfigEditorDialog(config_path=config_path, parent=parent)
     return dlg.exec_() == QDialog.Accepted

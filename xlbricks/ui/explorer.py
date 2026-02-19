@@ -16,7 +16,10 @@ from xlbricks.ui.tree_model import DictionaryTreeModel, node_structure_from_dict
 
 
 class Singleton(object):
-    """Singleton base class """
+    """Ensures only one instance of a class exists.
+    
+    Base class for singleton pattern implementation.
+    """
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(Singleton, cls).__new__(cls)
@@ -24,6 +27,10 @@ class Singleton(object):
 
 
 class ExplorerTreeView(QTreeView):
+    """Tree view widget for displaying brick hierarchies.
+    
+    Supports keyboard navigation and F5 refresh.
+    """
 
     keyPressedNavigation = QtCore.pyqtSignal()
     keyPressedRefresh = QtCore.pyqtSignal()
@@ -49,17 +56,25 @@ class ExplorerTreeView(QTreeView):
                 super().keyPressEvent(event)
 
     def refresh(self):
+        """Reload the tree view with current brick data from memory."""
         model = DictionaryTreeModel(node_structure_from_dict(XLBricksFrontStack().to_dict()))
         self.setModel(model)
 
 
 class ExplorerTableView(QTableView):
+    """Table view widget for displaying brick data values.
+    
+    Shows the contents of selected bricks in tabular format.
+    """
+    
     def __init__(self):
         super(QTableView, self).__init__()
-        # self.setFocusPolicy(QtCore.Qt.NoFocus)
-        # self.setStyleSheet("selection-background-color: rgb(210, 232, 255); font-size: 16px; text-align: right;")
 
     def refresh(self, data=None):
+        """Update the table view with new data.
+        
+        Accepts DataFrames, arrays, or scalar values.
+        """
         if data is None:
             df = pd.DataFrame()
         elif isinstance(data, pd.DataFrame):
@@ -72,8 +87,16 @@ class ExplorerTableView(QTableView):
 
 
 class Explorer(QWidget):
+    """Main explorer window for browsing bricks.
+    
+    Split view with tree navigation on left and data table on right.
+    """
 
     def __init__(self, model):
+        """Initialize the explorer with a tree model.
+        
+        Sets up the UI with tree and table views.
+        """
         super(Explorer, self).__init__()
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self._entry = QLineEdit()
@@ -82,10 +105,15 @@ class Explorer(QWidget):
         self._button = QPushButton()
 
     def refresh(self):
+        """Reload both tree and table views with current data."""
         self._tree_view.refresh()
         self._table_view.refresh()
 
     def load_data_frame(self):
+        """Load the selected brick's data into the table view.
+        
+        Triggered when user clicks or navigates in the tree.
+        """
         try:
             index = self._tree_view.currentIndex()
             if not index.isValid():
@@ -108,6 +136,10 @@ class Explorer(QWidget):
             self._table_view.refresh(None)
 
     def display(self):
+        """Show the explorer window for viewing all bricks.
+        
+        Displays the full brick collection in a split-pane interface.
+        """
         self.setWindowTitle('Object Viewer')
         self.setMinimumSize(600, 400)
         self._tree_view.clicked.connect(self.load_data_frame)
@@ -122,6 +154,10 @@ class Explorer(QWidget):
         self.show()
 
     def display_one_element(self):
+        """Show the explorer window for a single brick.
+        
+        Displays one brick's structure and contents in detail.
+        """
         self.setWindowTitle('Object Viewer')
         self.setMinimumSize(200, 300)
         self._tree_view.clicked.connect(self.load_data_frame)

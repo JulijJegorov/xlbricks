@@ -9,14 +9,21 @@ from xlbricks.ui.node import Node
 from PyQt5 import QtCore
 
 class DictionaryTreeModel(QtCore.QAbstractItemModel):
-    """Data model providing a tree of an arbitrary dictionary"""
+    """Qt model for displaying nested dictionaries as a tree structure.
+    
+    Converts hierarchical data into a format suitable for tree views.
+    """
 
     def __init__(self, root, parent=None):
+        """Initialize the tree model with a root node.
+        
+        The root node should be created using node_structure_from_dict.
+        """
         super(DictionaryTreeModel, self).__init__(parent)
         self._rootNode = root
 
     def rowCount(self, parent):
-        """the number of rows is the number of children"""
+        """Return the number of children for a given parent node."""
         if not parent.isValid():
             parent_node = self._rootNode
         else:
@@ -25,11 +32,14 @@ class DictionaryTreeModel(QtCore.QAbstractItemModel):
         return parent_node.child_count()
 
     def columnCount(self, parent):
-        """Number of columns is always 2 since dictionaries consist of key-value pairs"""
+        """Return the number of columns (always 1 for tree display)."""
         return 1
 
     def data(self, index, role):
-        """returns the data requested by the view"""
+        """Provide data for display in the tree view.
+        
+        Returns node names for rendering.
+        """
         if not index.isValid():
             return None
 
@@ -38,7 +48,7 @@ class DictionaryTreeModel(QtCore.QAbstractItemModel):
             return node.data(index.column())
 
     def parent(self, index):
-        """returns the parent from given index"""
+        """Get the parent index for a given node index."""
         node = self.get_node(index)
         parent_node = node.parent()
         if parent_node == self._rootNode:
@@ -47,7 +57,7 @@ class DictionaryTreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(parent_node.row(), 0, parent_node)
 
     def index(self, row, column, parent):
-        """returns an index from given row, column and parent"""
+        """Create an index for accessing a specific node in the tree."""
         parent_node = self.get_node(parent)
         child_item = parent_node.child(row)
 
@@ -57,7 +67,10 @@ class DictionaryTreeModel(QtCore.QAbstractItemModel):
             return QtCore.QModelIndex()
 
     def get_node(self, index):
-        """returns a Node() from given index"""
+        """Retrieve the Node object from a model index.
+        
+        Returns the root node if index is invalid.
+        """
         if index.isValid():
             node = index.internalPointer()
             if node:
@@ -66,7 +79,10 @@ class DictionaryTreeModel(QtCore.QAbstractItemModel):
 
 
 def node_structure_from_dict(datadict, parent=None, root_node=None):
-    """returns a hierarchical node structure required by the TreeModel"""
+    """Convert a nested dictionary into a tree of Node objects.
+    
+    Recursively builds the node hierarchy for tree model display.
+    """
     if not parent:
         root_node = Node('Root')
         parent = root_node

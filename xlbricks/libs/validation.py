@@ -11,7 +11,10 @@ _ERROR_PREFIX = '#XLB ERROR: '
 
 
 def _is_missing(val):
-    """True if value is missing, empty, or not properly defined for use as input."""
+    """Check if a value is missing, empty, or invalid.
+    
+    Handles None, NaN, empty strings, empty arrays, and all-NaN arrays.
+    """
     if val is None:
         return True
     if isinstance(val, float) and np.isnan(val):
@@ -31,7 +34,10 @@ def _is_missing(val):
 
 
 def _check_required(name, val, allow_none=False):
-    """Return an error string if required value is missing, else None."""
+    """Validate that a required parameter has a value.
+    
+    Returns an error message if missing, otherwise None.
+    """
     if allow_none and val is None:
         return None
     if _is_missing(val):
@@ -40,7 +46,10 @@ def _check_required(name, val, allow_none=False):
 
 
 def _check_array_2d(name, val, required=True):
-    """Return an error string if value is not a 2D array (when required), else None."""
+    """Validate that a value is a non-empty 2D array.
+    
+    Returns an error message if invalid, otherwise None.
+    """
     if val is None and not required:
         return None
     if val is None:

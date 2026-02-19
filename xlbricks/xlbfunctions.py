@@ -48,6 +48,10 @@ def _return_errors(f):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_brick(key, data, persist=True, xlapp=None):
+    """Create a single named brick from Excel data.
+    
+    Returns a reference string (e.g., 'mykey:1') that can be used in other functions.
+    """
     err = _check_required('key', key) or _check_array_2d('data', data)
     if err:
         return err
@@ -76,6 +80,10 @@ def xlb_brick(key, data, persist=True, xlapp=None):
 def xlb_bricks(key_1, brick_1, key_2=None, brick_2=None, key_3=None, brick_3=None,
                key_4=None, brick_4=None, key_5=None, brick_5=None, key_6=None, brick_6=None,
                key_7=None, brick_7=None, key_8=None, brick_8=None, persist=True, xlapp=None):
+    """Create multiple named bricks at once (up to 8 key-value pairs).
+    
+    Returns a reference to the collection of bricks.
+    """
     err = _check_required('key_1', key_1) or _check_array_2d('brick_1', brick_1)
     if err:
         return err
@@ -88,6 +96,10 @@ def xlb_bricks(key_1, brick_1, key_2=None, brick_2=None, key_3=None, brick_3=Non
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_array(data, persist=True, xlapp=None):
+    """Store an Excel range as a brick array.
+    
+    Preserves the original structure and data types of the range.
+    """
     err = _check_array_2d('data', data)
     if err:
         return err
@@ -99,6 +111,10 @@ def xlb_array(data, persist=True, xlapp=None):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_list(data, persist=True, xlapp=None):
+    """Convert an Excel range into a flattened list.
+    
+    Useful for creating one-dimensional sequences from multi-cell ranges.
+    """
     err = _check_array_2d('data', data)
     if err:
         return err
@@ -112,6 +128,10 @@ def xlb_list(data, persist=True, xlapp=None):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_table(data, columns=None, index=None, persist=True, xlapp=None):
+    """Create a pandas DataFrame from Excel data with optional column names and row index.
+    
+    Ideal for structured tabular data with headers.
+    """
     err = _check_array_2d('data', data)
     if err:
         return err
@@ -123,6 +143,10 @@ def xlb_table(data, columns=None, index=None, persist=True, xlapp=None):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_grid(data, persist=True, xlapp=None):
+    """Parse a grid layout where the first column contains keys and remaining columns contain data.
+    
+    Each row with a key in column 1 becomes a separate brick.
+    """
     err = _check_array_2d('data', data)
     if err:
         return err
@@ -135,6 +159,10 @@ def xlb_grid(data, persist=True, xlapp=None):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_lookup(bricks, keys=None, persist=True, xlapp=None):
+    """Retrieve a nested brick using a path like 'parent/child/grandchild'.
+    
+    Use forward slashes to navigate through nested brick structures.
+    """
     err = _check_array_2d('bricks', bricks) or _check_required('keys', keys)
     if err:
         return err
@@ -145,6 +173,10 @@ def xlb_lookup(bricks, keys=None, persist=True, xlapp=None):
 @xw.arg('brick', np.array, ndim=2)
 @_return_errors
 def xlb_flatten(brick):
+    """Extract the raw data from a brick reference.
+    
+    Returns the underlying array or value without the brick wrapper.
+    """
     err = _check_array_2d('brick', brick)
     if err:
         return err
@@ -155,6 +187,10 @@ def xlb_flatten(brick):
 @xw.arg('brick', np.array, ndim=2)
 @_return_errors
 def xlb_alias(brick, alias):
+    """Assign a custom name (alias) to an existing brick.
+    
+    Makes bricks easier to reference with memorable names instead of cell addresses.
+    """
     err = _check_array_2d('brick', brick) or _check_required('alias', alias)
     if err:
         return err
@@ -166,6 +202,10 @@ def xlb_alias(brick, alias):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_create_function(functions, persist=True, xlapp=None):
+    """Define Python functions directly in Excel cells.
+    
+    Write function code in a range and execute it to create callable functions.
+    """
     err = _check_array_2d('functions', functions)
     if err:
         return err
@@ -179,6 +219,10 @@ def xlb_create_function(functions, persist=True, xlapp=None):
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_create_context(context_name, context_path, args=None, persist=True, xlapp=None):
+    """Create an instance of a Python class from a module path.
+    
+    Useful for instantiating objects like QuantLib contexts with optional arguments.
+    """
     err = _check_required('context_name', context_name) or _check_required('context_path', context_path)
     if err:
         return err
@@ -192,6 +236,10 @@ def xlb_create_context(context_name, context_path, args=None, persist=True, xlap
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_run_function(function_brick, function_name, args=None, persist=True, xlapp=None):
+    """Execute a function stored in a brick with optional arguments.
+    
+    Pass arguments as key-value pairs in a range.
+    """
     err = _check_array_2d('function_brick', function_brick) or _check_required('function_name', function_name)
     if err:
         return err
@@ -205,6 +253,10 @@ def xlb_run_function(function_brick, function_name, args=None, persist=True, xla
 @xw.arg('xl_app', vba='Application')
 @_return_errors
 def xlb_run_quantlib_function(quantlib_object, function_name, args=None, persist=True, xl_app=None):
+    """Call a method on a QuantLib object stored in a brick.
+    
+    Enables financial calculations using QuantLib directly from Excel.
+    """
     err = _check_array_2d('quantlib_object', quantlib_object) or _check_required('function_name', function_name)
     if err:
         return err
@@ -220,6 +272,10 @@ def xlb_run_quantlib_function(quantlib_object, function_name, args=None, persist
 @xw.arg('xlapp', vba='Application')
 @_return_errors
 def xlb_merge(brick_1, brick_2, brick_3=None, brick_4=None, brick_5=None, persist=True, xlapp=None):
+    """Combine multiple bricks into a single collection (up to 5 bricks).
+    
+    All keys from the input bricks are merged into one unified brick.
+    """
     err = _check_array_2d('brick_1', brick_1) or _check_array_2d('brick_2', brick_2)
     if err:
         return err
@@ -229,18 +285,30 @@ def xlb_merge(brick_1, brick_2, brick_3=None, brick_4=None, brick_5=None, persis
 @xw.func
 @_return_errors
 def xlb_today():
+    """Return today's date.
+    
+    Simple utility function for getting the current date in Excel.
+    """
     return datetime.today()
 
 
 @xw.func
 @_return_errors
 def xlb_clear_bricks_front():
+    """Clear all bricks from memory.
+    
+    Use this to reset the brick storage and free up memory.
+    """
     return xl.clear_bricks_front()
 
 
 @xw.func
 @_return_errors
 def xlb_open_bricks_explorer():
+    """Open a visual explorer window showing all bricks currently in memory.
+    
+    Browse the brick hierarchy and view data in a tree and table interface.
+    """
     explorer_app = QApplication(sys.argv)
     img_path = _get_image_path('stars.png')
     explorer_app.setWindowIcon(QIcon(img_path))
@@ -254,6 +322,10 @@ def xlb_open_bricks_explorer():
 @xw.arg('data', np.array, ndim=2)
 @_return_errors
 def xlb_open_brick_explorer(data):
+    """Open a visual explorer window for a specific brick.
+    
+    View the structure and contents of a single brick in detail.
+    """
     err = _check_array_2d('data', data)
     if err:
         return err
