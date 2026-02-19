@@ -12,7 +12,8 @@ import os
 
 # Ensure package root is on path when running tests
 _here = os.path.dirname(os.path.abspath(__file__))
-_root = os.path.dirname(_here)
+_xlbricks = os.path.dirname(_here)
+_root = os.path.dirname(_xlbricks)
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
